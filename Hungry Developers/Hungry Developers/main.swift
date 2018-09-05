@@ -66,17 +66,14 @@ class Spoon {
     
     // MARK: - Methods
     
-    func pickUp() {
-        if isPickedUp {
-            pickUp()
-        } else {
-            lock.lock()
-            print("before changing isPickedUp")
-            isPickedUp = true
-            lock.unlock()
-            return
-        }
-    }
+func pickUp() {
+    while isPickedUp { continue }
+    
+    lock.lock()
+    print("before changing isPickedUp")
+    isPickedUp = true
+    lock.unlock()
+}
     
     func putDown() {
         lock.lock()
@@ -102,6 +99,8 @@ var developer5 = Developer(name: "Developer5", leftSpoon: spoon5, rightSpoon: sp
 
 let developers = [developer1, developer2, developer3, developer4, developer5]
 
-DispatchQueue.concurrentPerform(iterations: 5) {
-    developers[$0].run()
+DispatchQueue.concurrentPerform(iterations: 5) { i in
+    developers[i].run()
 }
+
+CFRunLoopRun()
