@@ -29,10 +29,18 @@ class Developer {
     func think() {
         DispatchQueue.concurrentPerform(iterations: 2) { int in
             if int == 0 {
-                leftSpoon.pickUp()
+                if leftSpoon.id < rightSpoon.id {
+                    leftSpoon.pickUp()
+                } else {
+                    rightSpoon.pickUp()
+                }
                 print("\(name) picked up left spoon")
             } else {
-                rightSpoon.pickUp()
+                if leftSpoon.id < rightSpoon.id {
+                    rightSpoon.pickUp()
+                } else {
+                    leftSpoon.pickUp()
+                }
                 print("\(name) picked up right spoon")
             }
         }
@@ -58,26 +66,23 @@ class Developer {
 
 class Spoon {
     
+    init(id: Int) {
+        self.id = id
+    }
+    
     // MARK: - Properties
     
-    private var isPickedUp = false
+    let id: Int
     private let lock = NSLock()
     
     
     // MARK: - Methods
     
-func pickUp() {
-    while isPickedUp { continue }
-    
-    lock.lock()
-    print("before changing isPickedUp")
-    isPickedUp = true
-    lock.unlock()
-}
+    func pickUp() {
+        lock.lock()
+    }
     
     func putDown() {
-        lock.lock()
-        isPickedUp = false
         lock.unlock()
     }
 }
@@ -85,11 +90,11 @@ func pickUp() {
 
 // MARK: - Testing
 
-var spoon1 = Spoon()
-var spoon2 = Spoon()
-var spoon3 = Spoon()
-var spoon4 = Spoon()
-var spoon5 = Spoon()
+var spoon1 = Spoon(id: 1)
+var spoon2 = Spoon(id: 2)
+var spoon3 = Spoon(id: 3)
+var spoon4 = Spoon(id: 4)
+var spoon5 = Spoon(id: 5)
 
 var developer1 = Developer(name: "Developer1", leftSpoon: spoon1, rightSpoon: spoon2)
 var developer2 = Developer(name: "Developer2", leftSpoon: spoon2, rightSpoon: spoon3)
@@ -99,8 +104,10 @@ var developer5 = Developer(name: "Developer5", leftSpoon: spoon5, rightSpoon: sp
 
 let developers = [developer1, developer2, developer3, developer4, developer5]
 
-DispatchQueue.concurrentPerform(iterations: 5) { i in
-    developers[i].run()
+for developer in developers {
+    DispatchQueue.global().async {
+        developer.run()
+    }
 }
 
-CFRunLoopRun()
+dispatchMain()
